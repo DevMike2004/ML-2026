@@ -109,6 +109,7 @@ npList = np.array(list)
 print(npList)
 print(npList.shape)
 print(npList.ndim)
+makeSpace()
 
 npReshape = npList.reshape(-1,2)
 print(npReshape)
