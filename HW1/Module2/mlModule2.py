@@ -1,3 +1,4 @@
+import numpy as np
 from pathlib import Path
 import pandas as pd
 import tarfile
@@ -39,3 +40,17 @@ plt.rc('ytick', labelsize=10)
 housing_full.hist(bins=50, figsize=(12,8))
 
 plt.show()
+
+def randSplitData(data, ratio, rng):
+    indices = rng.permutation(len(data))
+    print(rng.permutation(len(data)))
+    testSize = int(len(data) * ratio)
+    testIndices = indices[:testSize]
+    trainIndices = indices[testSize:]
+    return data.iloc[trainIndices], data.iloc[testIndices]
+
+rng = np.random.default_rng(seed=42)
+trainSet, testSet = randSplitData(housing_full, .2, rng)
+print(len(trainSet))
+print(len(testSet))
+
