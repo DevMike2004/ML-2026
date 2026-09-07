@@ -1,1 +1,21 @@
 # Created by venv; see https://docs.python.org/3/library/venv.html
+
+#Mac Clutter file for translating formatting
+.DS_Store
+
+# Jup Notebook temp checkpoints
+.ipynb_checkpoints/
+
+# Pytohn compiled bytecode and cache
+__pycache__/
+*.py
+
+# Python venv config file
+*.cfg
+
+# Extranious Directories
+bin/
+etc/
+include/
+lib/
+share/
