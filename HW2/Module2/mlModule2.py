@@ -48,40 +48,40 @@ print( "----------------------------------------------------\n")
 print(housing_full.describe())
 
 # setting up the tables and their formatting
-#plt.rc('font', size=14)
-#plt.rc('axes', labelsize=14, titlesize=14)
-#plt.rc('legend', fontsize=14)
-#plt.rc('xtick', labelsize=10)
-#plt.rc('ytick', labelsize=10)
+plt.rc('font', size=14)
+plt.rc('axes', labelsize=14, titlesize=14)
+plt.rc('legend', fontsize=14)
+plt.rc('xtick', labelsize=10)
+plt.rc('ytick', labelsize=10)
 
-#housing_full.hist(bins=50, figsize=(12,8))
+housing_full.hist(bins=50, figsize=(12,8))
 
-#plt.show()
+plt.show()
 
 print("\n_______________________________________________________________________\n\n")
 
-#housingWithId = housing_full.reset_index()
-#trainSet, testSet = splitDataHash(housingWithId, 0.1661, "index")
-#print(len(testSet) / len(trainSet))
-#
-#print("\n_______________________________________________________________________\n\n")
-#
-#housingWithId["id"] = (housing_full["longitude"]) * 1000 + housing_full["latitude"]
-#trainSet, testSet = splitDataHash(housingWithId, .16, "id")
-#print(len(testSet) / len(trainSet))
-#
-#print(testSet["total_bedrooms"].isnull().sum())
-#print(trainSet["total_bedrooms"].isnull().sum())
+housingWithId = housing_full.reset_index()
+trainSet, testSet = splitDataHash(housingWithId, 0.1661, "index")
+print(len(testSet) / len(trainSet))
 
-# using a binomial distribution algorithm to find the chances that sample is bad
-#sampleSize = 1000
-#femaleRatio = .516
-#probTooSmall = binom(sampleSize, femaleRatio).cdf(490 - 1)
-#probTooLarge = 1 - binom(sampleSize, femaleRatio).cdf(540)
-#
-#print("\n_______________________________________________________________________\n\n")
-#
-#print(probTooSmall + probTooLarge)
+print("\n_______________________________________________________________________\n\n")
+
+housingWithId["id"] = (housing_full["longitude"]) * 1000 + housing_full["latitude"]
+trainSet, testSet = splitDataHash(housingWithId, .16, "id")
+print(len(testSet) / len(trainSet))
+
+print(testSet["total_bedrooms"].isnull().sum())
+print(trainSet["total_bedrooms"].isnull().sum())
+
+ using a binomial distribution algorithm to find the chances that sample is bad
+sampleSize = 1000
+femaleRatio = .516
+probTooSmall = binom(sampleSize, femaleRatio).cdf(490 - 1)
+probTooLarge = 1 - binom(sampleSize, femaleRatio).cdf(540)
+
+print("\n_______________________________________________________________________\n\n")
+
+print(probTooSmall + probTooLarge)
 
 housing_full["income_cat"] = pd.cut(housing_full["median_income"], 
                                     bins=[0., 1.5, 3.0, 4.5, 6.0, np.inf],
