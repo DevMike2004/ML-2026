@@ -134,7 +134,7 @@ num_pipe = Pipeline([
 
 cat_pipe = Pipeline([
     ("imputer", SimpleImputer(strategy="most_frequent")),
-    ("cat_encoder", OneHotEncoder()),
+    ("cat_encoder", OneHotEncoder(handle_unknown="ignore")),
 ])
 
 preprocess_pipe = ColumnTransformer([
@@ -153,23 +153,26 @@ from sklearn.model_selection import train_test_split
 
 X_train, X_test, yc_train, yc_test, yr_train, yr_test = train_test_split(
     X, y_class, y_reg, test_size=0.2, random_state=42, stratify=y_class)
+X_tr, X_val, y_tr, y_val = train_test_split(
+    X_train, yc_train, test_size=0.2, random_state=42, stratify=yc_train)
 ```
 
 ## Define the sgd model 
 ```python
+import time
 from sklearn.base import clone
-from sklearn.linear_model import SGDClassifier
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import SGDClassifier, LinearRegression
 from sklearn.metrics import accuracy_score, f1_score
 
 def run_sgd(**param):
-    pipe = Pipeline([
-        ('preprocess', clone(preprocess_pipe)),
-        ("sgd_clf", SGDClassifier(max_iter=1000, tol=1e-3, random_state=42, **param))
-        ])
-    pipe.fit(X_train, yc_train)
-    pred = pipe.predict(X_test)
-    return {**param, "accuracy": accuracy_score(yc_test, pred), "f1": f1_score(yc_test, pred, average="macro")}
+    pipe = Pipeline([("preprocess", clone(preprocess_pipe)),
+                     ("sgd_clf", SGDClassifier(max_iter=1000, tol=1e-3, random_state=42, **param))])
+    start = time.time()
+    pipe.fit(X_tr, y_tr)
+    train_time = time.time() - start
+    pred = pipe.predict(X_val)
+    return {**param, "iters": pipe.named_steps["sgd_clf"].n_iter_, "time_s": round(train_time, 3),
+            "accuracy": accuracy_score(y_val, pred), "f1": f1_score(y_val, pred, average="macro")}
 ```
 This just allows me to import any number of parameters all at once
 We are also using 1000 max iteration, but we will most likely not use them all
@@ -178,7 +181,7 @@ We also have a hard encoded stoppage. But I will probably change this for regula
 
 ## Loss function comparison
 ```python
-loss_df = pd.DataFrame([run_sgd(loss=l) for l in ["log_loss", "hinge", "modified_huber", "perceptron"]])
+loss_df = pd.DataFrame([run_sgd(loss=l) for l in ["log_loss", "hinge"]])
 loss_df
 ```
 After inputing all my known loss', we see that log_loss and hinge are the best. They have the highest F1 and accuracy
@@ -203,16 +206,21 @@ Optimal stays the same here for all values of e but outscores invscaling in ever
 
 ## Test tuned model against Basic LogReg
 ```python
+import time
 from sklearn.linear_model import LogisticRegression
+
 models = {
-    "LogisticRegression": LogisticRegression(max_iter=1000, random_state=42),
     "SGD (tuned)": SGDClassifier(loss="log_loss", alpha=0.001, max_iter=1000, tol=1e-3, random_state=42),
+    "LogisticRegression": LogisticRegression(max_iter=1000, random_state=42),
 }
 for name, clf in models.items():
     pipe = Pipeline([("preprocess", clone(preprocess_pipe)), ("clf", clf)])
+    start = time.time()
     pipe.fit(X_train, yc_train)
+    train_time = time.time() - start
     pred = pipe.predict(X_test)
-    print(name, "| acc:", round(accuracy_score(yc_test, pred), 3), "| f1:", round(f1_score(yc_test, pred, average="macro"), 3))
+    print(name, "| iters:", np.max(pipe.named_steps["clf"].n_iter_), "| time:", round(train_time, 3),
+          "| acc:", round(accuracy_score(yc_test, pred), 3), "| f1:", round(f1_score(yc_test, pred, average="macro"), 3))
 ```
 Logistic Regression wins here no doubt. It has higher values of accuracy and F1
 
