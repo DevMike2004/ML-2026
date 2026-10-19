@@ -142,7 +142,7 @@ preprocess_pipe = ColumnTransformer([
     ("cat", cat_pipe, cat_cols)
 ])
 ```
-Above, i deciced to use median because certain num columns are skewed heavily.
+Above, I deciced to use median because certain num columns are skewed heavily.
 I also chose to use most_frequent imputation because I'm just used to it and I've see consistent results so far
 
 
